@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+//package model;
+
+option java_multiple_files = true;
+option java_outer_classname = "CrawlerProto";
+option java_package = "serialization.protobuf";
+
+
+message Website {
+    string name = 1;
+    string content = 2;
+    string url = 3;
+}
+
+message Websites {
+    repeated Website website = 1;
+}
