@@ -31,18 +31,32 @@ public class CrawlerActor extends AbstractBehavior<CrawlerActor.Command> {
     public static final class StartCrawler implements Command {
         public final String routerId;
         public final String targetUrl;
-        public final ActorRef<CrawlerRouter.StartCrawlerResponse> replyTo;
+        public final ActorRef<StartCrawlerResponse> replyTo;
 
-        public StartCrawler(String routerId, String targetUrl, ActorRef<CrawlerRouter.StartCrawlerResponse> replyTo) {
+        public StartCrawler(String routerId, String targetUrl, ActorRef<StartCrawlerResponse> replyTo) {
             this.routerId = routerId;
             this.targetUrl = targetUrl;
             this.replyTo = replyTo;
         }
     }
 
+    public static final class StartCrawlerResponse {
+        public final String routerId;
+        public final String targetUrl;
+        public final CrawlerState state;
+        public final String result;
+
+        public StartCrawlerResponse(String routerId, String targetUrl, CrawlerState state, String result) {
+            this.routerId = routerId;
+            this.targetUrl = targetUrl;
+            this.state = state;
+            this.result = result;
+        }
+    }
+
     public interface CrawlerState {}
 
-    public static enum ParseSuccess implements CrawlerState {
+    public static enum  ParseSuccess implements CrawlerState {
         INSTANCE
     }
 
@@ -63,10 +77,18 @@ public class CrawlerActor extends AbstractBehavior<CrawlerActor.Command> {
     private Behavior<Command> onStartCrawler(StartCrawler command) {
         CompletableFuture<String> futureResult = null;
         try {
-            futureResult = webClient.getBodyWithCompletableFuture(command.);
+            futureResult = webClient.getBodyWithCompletableFuture(command.targetUrl);
             getContext().pipeToSelf(
                     futureResult, (result, failure) -> {
-                        return new Write(Optional.ofNullable(result), command.requestId, command.replyTo);
+                        if (result != null) {
+                            command.replyTo.tell(new StartCrawlerResponse(command.routerId, command.targetUrl, ParseSuccess.INSTANCE, result));
+                        } else {
+                            // TODO: Need to distinguish crawlerFailure and TargetInvalid
+                            command.replyTo.tell(new StartCrawlerResponse(command.routerId, command.targetUrl, CrawlerFailure.INSTANCE, null));
+                        }
+                        // TODO:implment write command
+//                        return new Write(Optional.ofNullable(result), command.routerId, command.replyTo);
+
 //                        this.result = Optional.ofNullable(result);
 //                        command.replyTo.tell(new ResponseHasParsed(command.requestId));
 //                        return this;
@@ -80,6 +102,7 @@ public class CrawlerActor extends AbstractBehavior<CrawlerActor.Command> {
 //                            return new ParseResponse(new FailedParse(command.requestId, crawlerId, new RuntimeException(failure)), command.replyTo);
 ////                        throw new RuntimeException(failure);
 //                        }
+                        return null;
                     }
             );
             return this;
@@ -119,9 +142,9 @@ public class CrawlerActor extends AbstractBehavior<CrawlerActor.Command> {
     public static class Write implements Command {
         final Optional<String> result;
         final String requestId;
-        public final ActorRef<Response> replyTo;
+        public final ActorRef<WriteResponse> replyTo;
 
-        public Write(Optional<String> result, String requestId, ActorRef<Response> replyTo) {
+        public Write(Optional<String> result, String requestId, ActorRef<WriteResponse> replyTo) {
             this.result = result;
             this.requestId = requestId;
             this.replyTo = replyTo;
@@ -130,8 +153,19 @@ public class CrawlerActor extends AbstractBehavior<CrawlerActor.Command> {
 
     private Behavior<Command> onWrite(Write command) {
         result = command.result;
-        command.replyTo.tell(new Response(command.requestId, result));
+        command.replyTo.tell(new WriteResponse(command.requestId, result));
         return this;
+    }
+
+    public static final class WriteResponse {
+        final String requestId;
+        //        final String crawlerId;
+        final Optional<String> result;
+        public WriteResponse(String requestId, Optional<String> result) {
+            this.requestId = requestId;
+//            this.crawlerId = crawlerId;
+            this.result = result;
+        }
     }
 //
 //
@@ -178,16 +212,7 @@ public class CrawlerActor extends AbstractBehavior<CrawlerActor.Command> {
 //        }
 //    }
 
-    public static final class Response  {
-        final String requestId;
-//        final String crawlerId;
-        final Optional<String> result;
-        public Response(String requestId,  Optional<String> result) {
-            this.requestId = requestId;
-//            this.crawlerId = crawlerId;
-            this.result = result;
-        }
-    }
+
 
 //    private Behavior<Command> onPostStop() {
 ////        getContext().getLog().info("Crawler actor from pool-{} stopped", poolId);
