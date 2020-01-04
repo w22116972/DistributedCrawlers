@@ -99,7 +99,7 @@ public class CrawlerRouter extends AbstractBehavior<CrawlerRouter.Command> {
         if (response.state instanceof CrawlerActor.ParseSuccess) {
             this.results.put(response.targetUrl, response.result);
         } else if (response.state instanceof CrawlerActor.TargetInvalid) {
-            // TODO: log (url is invalid)
+            getContext().getLog().debug("Target url is invalid: {}", response.targetUrl);
         } else if (response.state instanceof CrawlerActor.CrawlerFailure) {
             final ActorRef<CrawlerActor.StartCrawlerResponse> startCrawlerResponseAdapter = getContext().messageAdapter(CrawlerActor.StartCrawlerResponse.class, WrappedStartCrawlerResponse::new);
             this.router.tell(new CrawlerActor.StartCrawler(response.routerId, response.targetUrl, startCrawlerResponseAdapter));

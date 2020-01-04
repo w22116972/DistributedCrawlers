@@ -45,6 +45,21 @@ public class WebClient {
         return true;
     }
 
+    public static Throwable throwExcpetionIfInvalidUrl(String url) {
+        URL u = null;
+        try {
+            u = new URL(url);
+        } catch (MalformedURLException e) {
+            return e;
+        }
+        try {
+            u.toURI();
+        } catch (URISyntaxException e) {
+            return e;
+        }
+        return null;
+    }
+
     public CompletableFuture<String> getBodyWithCompletableFuture(String url) throws IllegalStateException {
         if (!isValidURL(url)) {
             // log.error("");

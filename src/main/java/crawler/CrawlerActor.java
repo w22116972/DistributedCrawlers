@@ -1,5 +1,6 @@
 package crawler;
 
+import akka.actor.Actor;
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
 import akka.actor.typed.javadsl.AbstractBehavior;
@@ -56,16 +57,31 @@ public class CrawlerActor extends AbstractBehavior<CrawlerActor.Command> {
 
     public interface CrawlerState {}
 
-    public static enum  ParseSuccess implements CrawlerState {
-        INSTANCE
+    public static enum ParseSuccess implements CrawlerState {
+        INSTANCE;
+
+        @Override
+        public String toString() {
+            return "ParseSuccess";
+        }
     }
 
     public static enum TargetInvalid implements CrawlerState {
-        INSTANCE
+        INSTANCE;
+
+        @Override
+        public String toString() {
+            return "TargetInvalid";
+        }
     }
 
     public static enum CrawlerFailure implements CrawlerState {
-        INSTANCE
+        INSTANCE;
+
+        @Override
+        public String toString() {
+            return "CrawlerFailure";
+        }
     }
 
 
@@ -75,21 +91,21 @@ public class CrawlerActor extends AbstractBehavior<CrawlerActor.Command> {
      * ref: https://doc.akka.io/docs/akka/current/typed/interaction-patterns.html#send-future-result-to-self
      * */
     private Behavior<Command> onStartCrawler(StartCrawler command) {
-        CompletableFuture<String> futureResult = null;
-        try {
-            if (WebClient.isValidURL(command.targetUrl)) {
-                command.replyTo.tell(new StartCrawlerResponse(command.routerId, command.targetUrl, TargetInvalid.INSTANCE, null));
-            } else {
-                futureResult = webClient.getBodyWithCompletableFuture(command.targetUrl);
-                getContext().pipeToSelf(
-                        futureResult, (result, failure) -> {
-                            if (result != null) {
-                                command.replyTo.tell(new StartCrawlerResponse(command.routerId, command.targetUrl, ParseSuccess.INSTANCE, result));
-                            } else {
-                                // TODO: Need to distinguish crawlerFailure and TargetInvalid
-                                command.replyTo.tell(new StartCrawlerResponse(command.routerId, command.targetUrl, CrawlerFailure.INSTANCE, null));
-                            }
-                            // TODO:implment write command
+        if (!WebClient.isValidURL(command.targetUrl)) {
+            getContext().getLog().debug("Url is not valid: {}", command.targetUrl);
+            command.replyTo.tell(new StartCrawlerResponse(command.routerId, command.targetUrl, TargetInvalid.INSTANCE, null));
+//            return new CrawlFailure(command.routerId, command.targetUrl, , command.replyTo);
+        } else {
+            CompletableFuture<String> futureResult = webClient.getBodyWithCompletableFuture(command.targetUrl);
+            getContext().pipeToSelf(
+                    futureResult, (result, failure) -> {
+                        if (failure == null && result != null) {
+                            return new CrawlSuccess(command.routerId, command.targetUrl, result, command.replyTo);
+                        } else {
+                            getContext().getLog().debug("Raise exception: : {}", failure.getMessage());
+                            return new CrawlFailure(command.routerId, command.targetUrl, failure, command.replyTo);
+                        }
+                        // TODO:implement write command
 //                        return new Write(Optional.ofNullable(result), command.routerId, command.replyTo);
 
 //                        this.result = Optional.ofNullable(result);
@@ -105,15 +121,65 @@ public class CrawlerActor extends AbstractBehavior<CrawlerActor.Command> {
 //                            return new ParseResponse(new FailedParse(command.requestId, crawlerId, new RuntimeException(failure)), command.replyTo);
 ////                        throw new RuntimeException(failure);
 //                        }
-                            return null;
-                        }
-                );
-            }
-            return this;
-        } catch (IllegalStateException e) {
-            throw e;
+                    }
+            );
+        }
+        return this;
+    }
+
+    public static final class CrawlResponse implements CrawlerActor.Command {
+        public final String routerId;
+        public final String targetUrl;
+        public final String result;
+        public final CrawlerState state;
+//        public final ActorRef<StartCrawlerResponse> replyTo;
+
+        public CrawlResponse(String routerId, String targetUrl, String result, CrawlerState state) {
+            this.routerId = routerId;
+            this.targetUrl = targetUrl;
+            this.result = result;
+            this.state = state;
         }
     }
+
+    public static class CrawlSuccess implements CrawlerActor.Command {
+        public final String routerId;
+        public final String targetUrl;
+        public final String result;
+        public final ActorRef<StartCrawlerResponse> replyTo;
+
+        public CrawlSuccess(String routerId, String targetUrl, String result, ActorRef<StartCrawlerResponse> replyTo) {
+            this.routerId = routerId;
+            this.targetUrl = targetUrl;
+            this.result = result;
+            this.replyTo = replyTo;
+        }
+    }
+
+    private Behavior<Command> onCrawlSuccess(CrawlSuccess command) {
+        command.replyTo.tell(new StartCrawlerResponse(command.routerId, command.targetUrl, ParseSuccess.INSTANCE, command.result));
+        return this;
+    }
+
+    public static class CrawlFailure implements CrawlerActor.Command {
+        public final String routerId;
+        public final String targetUrl;
+        public final Throwable exception;
+        public final ActorRef<StartCrawlerResponse> replyTo;
+
+        public CrawlFailure(String routerId, String targetUrl, Throwable exception, ActorRef<StartCrawlerResponse> replyTo) {
+            this.routerId = routerId;
+            this.targetUrl = targetUrl;
+            this.exception = exception;
+            this.replyTo = replyTo;
+        }
+    }
+
+    private Behavior<Command> onCrawlFailure(CrawlFailure command) {
+        command.replyTo.tell(new StartCrawlerResponse(command.routerId, command.targetUrl, CrawlerFailure.INSTANCE, null));
+        return this;
+    }
+
 
 //    public static final class ParseResponse {
 //        final String requestId;
@@ -223,10 +289,15 @@ public class CrawlerActor extends AbstractBehavior<CrawlerActor.Command> {
 //        return Behaviors.stopped();
 //    }
 
+
+
+
     @Override
     public Receive<Command> createReceive() {
         return newReceiveBuilder()
                 .onMessage(CrawlerActor.StartCrawler.class, this::onStartCrawler)
+                .onMessage(CrawlerActor.CrawlSuccess.class, this::onCrawlSuccess)
+                .onMessage(CrawlerActor.CrawlFailure.class, this::onCrawlFailure)
 //                .onMessage(Read.class, this::onRead)
                 .onMessage(Write.class, this::onWrite)
 //                .onMessage(Stop.class, message -> Behaviors.stopped())
