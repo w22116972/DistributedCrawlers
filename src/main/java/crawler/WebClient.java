@@ -30,7 +30,7 @@ public class WebClient {
         // .setProxyServer(new ProxyServer(...));
     }
 
-    public boolean isValidURL(String url) {
+    public static boolean isValidURL(String url) {
         URL u = null;
         try {
             u = new URL(url);

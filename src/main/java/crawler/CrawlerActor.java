@@ -77,16 +77,19 @@ public class CrawlerActor extends AbstractBehavior<CrawlerActor.Command> {
     private Behavior<Command> onStartCrawler(StartCrawler command) {
         CompletableFuture<String> futureResult = null;
         try {
-            futureResult = webClient.getBodyWithCompletableFuture(command.targetUrl);
-            getContext().pipeToSelf(
-                    futureResult, (result, failure) -> {
-                        if (result != null) {
-                            command.replyTo.tell(new StartCrawlerResponse(command.routerId, command.targetUrl, ParseSuccess.INSTANCE, result));
-                        } else {
-                            // TODO: Need to distinguish crawlerFailure and TargetInvalid
-                            command.replyTo.tell(new StartCrawlerResponse(command.routerId, command.targetUrl, CrawlerFailure.INSTANCE, null));
-                        }
-                        // TODO:implment write command
+            if (WebClient.isValidURL(command.targetUrl)) {
+                command.replyTo.tell(new StartCrawlerResponse(command.routerId, command.targetUrl, TargetInvalid.INSTANCE, null));
+            } else {
+                futureResult = webClient.getBodyWithCompletableFuture(command.targetUrl);
+                getContext().pipeToSelf(
+                        futureResult, (result, failure) -> {
+                            if (result != null) {
+                                command.replyTo.tell(new StartCrawlerResponse(command.routerId, command.targetUrl, ParseSuccess.INSTANCE, result));
+                            } else {
+                                // TODO: Need to distinguish crawlerFailure and TargetInvalid
+                                command.replyTo.tell(new StartCrawlerResponse(command.routerId, command.targetUrl, CrawlerFailure.INSTANCE, null));
+                            }
+                            // TODO:implment write command
 //                        return new Write(Optional.ofNullable(result), command.routerId, command.replyTo);
 
 //                        this.result = Optional.ofNullable(result);
@@ -102,9 +105,10 @@ public class CrawlerActor extends AbstractBehavior<CrawlerActor.Command> {
 //                            return new ParseResponse(new FailedParse(command.requestId, crawlerId, new RuntimeException(failure)), command.replyTo);
 ////                        throw new RuntimeException(failure);
 //                        }
-                        return null;
-                    }
-            );
+                            return null;
+                        }
+                );
+            }
             return this;
         } catch (IllegalStateException e) {
             throw e;
