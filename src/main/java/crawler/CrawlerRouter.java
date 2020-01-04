@@ -60,7 +60,6 @@ public class CrawlerRouter extends AbstractBehavior<CrawlerRouter.Command> {
 
     private static class WrappedStartCrawlerResponse implements Command {
         final CrawlerActor.StartCrawlerResponse response;
-
         public WrappedStartCrawlerResponse(CrawlerActor.StartCrawlerResponse response) {
             this.response = response;
         }
@@ -107,10 +106,16 @@ public class CrawlerRouter extends AbstractBehavior<CrawlerRouter.Command> {
         return this;
     }
 
+    private Behavior<Command> onReadRouter(CrawlerManager.ReadRouter command) {
+        command.replyTo.tell(new CrawlerManager.ReadRouterResponse(this.routerId, this.results));
+        return this;
+    }
+
     @Override
     public Receive<Command> createReceive() {
         return newReceiveBuilder()
                 .onMessage(CrawlerManager.StartRouter.class, this::onStartRouter)
+                .onMessage(CrawlerManager.ReadRouter.class, this::onReadRouter)
                 .onMessage(WrappedStartCrawlerResponse.class, this::onWrappedStartCrawlerResponse)
                 .build();
     }

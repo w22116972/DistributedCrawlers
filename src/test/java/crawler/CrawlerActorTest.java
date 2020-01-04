@@ -44,7 +44,10 @@ public class CrawlerActorTest {
     @Test
     public void testInvalidUrl() {
         String targetUrl = "htt:///";
+
         crawlerActor.tell(new CrawlerActor.StartCrawler("testId", targetUrl, probe.getRef()));
+
+
         assertEquals(CrawlerActor.TargetInvalid.INSTANCE.toString(), probe.receiveMessage().state.toString());
     }
 

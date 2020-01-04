@@ -32,7 +32,7 @@ public class CrawlerManager extends AbstractBehavior<CrawlerManager.Command> {
 
     public interface Command {}
 
-    public static final class CreateRouter implements Command, CrawlerRouter.Command {
+    public static final class CreateRouter implements CrawlerManager.Command, CrawlerRouter.Command {
         public final List<String> targetUrls;
         public final CrawlerRouterConfig routerConfig;
         public final ActorRef<CreateRouterResponse> replyTo;
@@ -48,7 +48,7 @@ public class CrawlerManager extends AbstractBehavior<CrawlerManager.Command> {
 
     }
 
-    public static final class StartRouter implements Command, CrawlerRouter.Command {
+    public static final class StartRouter implements CrawlerManager.Command, CrawlerRouter.Command {
         public final String routerId;
         public final ActorRef<StartRouterResponse> replyTo;
 
@@ -79,6 +79,27 @@ public class CrawlerManager extends AbstractBehavior<CrawlerManager.Command> {
         }
         return this;
     }
+
+    public static final class ReadRouter implements CrawlerManager.Command, CrawlerRouter.Command {
+        public final String routerId;
+        public final ActorRef<ReadRouterResponse> replyTo;
+
+        public ReadRouter(String routerId, ActorRef<ReadRouterResponse> replyTo) {
+            this.routerId = routerId;
+            this.replyTo = replyTo;
+        }
+    }
+
+    public static final class ReadRouterResponse {
+        public final String routerId;
+        public final Map<String, String> results;
+
+        public ReadRouterResponse(String routerId, Map<String, String> results) {
+            this.routerId = routerId;
+            this.results = results;
+        }
+    }
+
 
 //    public interface ParseState {}
 //
