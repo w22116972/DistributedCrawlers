@@ -34,19 +34,19 @@ public class CrawlerRouterTest {
     }
 
     @Test
-    public void test() {
+    public void testStartRouterSuccess() {
         final TestProbe<CrawlerManager.StartRouterResponse> startRouterResponseTestProbe = testKitResource.createTestProbe(CrawlerManager.StartRouterResponse.class);
         final TestProbe<CrawlerManager.ReadRouterResponse> readRouterResponseTestProbe = testKitResource.createTestProbe(CrawlerManager.ReadRouterResponse.class);
 //        System.out.println("crawlerRouter tell: "+ probe.getRef().path());
         crawlerRouter.tell(new CrawlerManager.StartRouter("testId", startRouterResponseTestProbe.ref()));
         try {
-            Thread.sleep(3000);
+            Thread.sleep(2000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         crawlerRouter.tell(new CrawlerManager.ReadRouter("testId", readRouterResponseTestProbe.ref()));
         try {
-            Thread.sleep(3000);
+            Thread.sleep(2000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -54,6 +54,8 @@ public class CrawlerRouterTest {
         assertEquals("Google", Jsoup.parse(readRouterResponse.results.get(targetUrl1)).title());
         assertEquals("Apple", Jsoup.parse(readRouterResponse.results.get(targetUrl2)).title());
     }
+
+
 
 
 }
