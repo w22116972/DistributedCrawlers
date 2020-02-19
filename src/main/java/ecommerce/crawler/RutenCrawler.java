@@ -48,6 +48,14 @@ public final class RutenCrawler implements Crawler {
     @Override
     public void run() {
         try {
+            // v2
+            Jsoup.connect(HOMEPAGE).get().select(HOMEPAGE_SELECTOR).stream().parallel().forEach(element ->
+
+                    );
+
+
+
+            // v1
             Document homepageDoc = Jsoup.connect(HOMEPAGE).get();
             produceCategoryCount(producer, homepageDoc);
             produceAdultCountBySelenium();
@@ -67,29 +75,28 @@ public final class RutenCrawler implements Crawler {
         }
     }
 
-    private void asyncSendToTopic(ProducerRecord<?, ?> record) {
+    private void asyncSendToTopic(ProducerRecord<String, Category> record) {
         producer.send(record, new CategoryProducerCallback());
     }
 
-    private void syncSendToTopic(ProducerRecord<?, ?> record) {
+    private void syncSendToTopic(ProducerRecord<String, Category> record) {
         try {
             producer.send(record).get();
         } catch (InterruptedException e) {
+            logger.error("Sending thread is interrupted", e);
             e.printStackTrace();
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
     }
 
-    private void fireAndForgetSendToTopic(ProducerRecord<?, ?> record) {
+    private void fireAndForgetSendToTopic(ProducerRecord<String, Category> record) {
         try {
             producer.send(record);
         } catch (SerializationException e) {
             logger.error("Failed to serialize message", e);
-        } catch (BufferExhaustedException | TimeoutException e) {
+        } catch (BufferExhaustedException e) {
             logger.error("Buffer is full", e);
-        } catch (InterruptedException e) {
-            logger.error("Sending thread was interrupted", e);
         }
     }
 
