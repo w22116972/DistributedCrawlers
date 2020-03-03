@@ -18,9 +18,9 @@ import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-public abstract class BaseRutenCrawler implements Crawler {
+public abstract class AbstractRutenCrawler implements Crawler {
 
-    protected static final Logger logger = LogManager.getLogger(BaseRutenCrawler.class);
+    protected static final Logger logger = LogManager.getLogger(AbstractRutenCrawler.class);
     protected static final String RUTEN_HOMEPAGE_CONFIG = "ecommerce.ruten.homepage";
     protected static final Properties CONFIG = ConfigurationFactory.loadConfig();
     protected static final String RUTEN_CATEGORY_INPUT = "ruten-category-input";

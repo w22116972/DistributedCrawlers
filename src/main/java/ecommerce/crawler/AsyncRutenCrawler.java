@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
-public class AsyncRutenCrawler extends BaseRutenCrawler {
+public class AsyncRutenCrawler extends AbstractRutenCrawler {
 
     public AsyncRutenCrawler() {
         super();
@@ -32,9 +32,9 @@ public class AsyncRutenCrawler extends BaseRutenCrawler {
     private void produceCategoryCount(Element homepageElement) {
         final String categoryName = extractCategoryName(homepageElement);
         final Stream<Element> categoryStream = createCategoryStream(homepageElement);
-        final Long categoryCount = categoryStream.filter(BaseRutenCrawler::isSubCategoryValid)
+        final Long categoryCount = categoryStream.filter(AbstractRutenCrawler::isSubCategoryValid)
                 .map(element -> element.text())
-                .mapToLong(BaseRutenCrawler::extractCount)
+                .mapToLong(AbstractRutenCrawler::extractCount)
                 .reduce(0, Long::sum);
         producer.send(new ProducerRecord<>(RUTEN_CATEGORY_INPUT, new Category(categoryName, categoryCount)));
         logger.info((categoryName + "(" + categoryCount + ") ... ok"));
