@@ -9,7 +9,7 @@ public class TopicPrinter<T> {
     private static final String GROUP_ID = "printer";
 
 
-    private Consumer<String, T> consumer = new GenericConsumerConfigFactory<T>(T).createConsumerConfig();
+//    private Consumer<String, T> consumer = new GenericConsumerConfigFactory<T>(T).createConsumerConfig();
 
     public TopicPrinter(String topic) {
         this.topic = topic;
