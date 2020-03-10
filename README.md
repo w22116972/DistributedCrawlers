@@ -1,13 +1,32 @@
 # Distributed Crawlers
 
-## TODO
 
-或是爬104網站，目標是跟職缺相關的技能
-https://mobiledev.tw/104api/
-linkedin api
+## 104 spec
+
+1. Kafka topic stores targets website
+
+2. Producer/Actor
+    - LinksCrawler: each crawler crawl all job links per page, and send links to load balancer
+    - JobTextProcessor
+3. load balancer (nginx) + cache (redis)
+    - filter duplicate links
+    - distribute links to worker/JobTextProcessor
+4.
+
+## 104 Pipeline
+
+1. PageLinksProducer: send page links to topic
+2.
+
+each job des link selector
+#js-job-content > article:nth-child(1) > div.b-block__left > h2 > a
+
+---
+
+## Tweet Stream Spec
 
 1. twitter api in stream
-2. akka stream for tweet
+2. akka stream/kafka stream for tweet
 3. send processed tweet to nginx
 4. nginx check if duplicate with redis
 5. nginx send message to kafka topic based on compressed key
