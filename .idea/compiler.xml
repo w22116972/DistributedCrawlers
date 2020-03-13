@@ -10,6 +10,11 @@
       </profile>
     </annotationProcessing>
   </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="DistributedCrawlers" options="-parameters" />
+    </option>
+  </component>
   <component name="SbtSettings">
     <option name="sbtLauncherJarPath" value="/usr/local/Cellar/sbt/1.1.0/libexec/bin/sbt-launch.jar" />
     <option name="useApplicationSettings" value="false" />
