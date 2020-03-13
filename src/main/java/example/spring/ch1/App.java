@@ -25,27 +25,28 @@ public class App {
         return String.format("{\"message\":\"Hello %s %s\"}",firstName, lastName);
     }
 
-    @PostMapping
-    public String helloPOST( @RequestBody HelloRequest request) {
+    @PostMapping // expose endpoint as POST-based
+    public String helloPOST( @RequestBody HelloRequest request) { // receive Json of HelloRequest
         return String.format("{\"message\":\"Hello %s %s\"}",request.getFirstName(), request.getLastName());
     }
-}
 
-class HelloRequest{
 
-    private String firstName;
-    private String lastName;
+    class HelloRequest{
 
-    public String getFirstName() {
-        return firstName;
-    }
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-    public String getLastName() {
-        return lastName;
-    }
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+        private String firstName;
+        private String lastName;
+
+        public String getFirstName() {
+            return firstName;
+        }
+        public void setFirstName(String firstName) {
+            this.firstName = firstName;
+        }
+        public String getLastName() {
+            return lastName;
+        }
+        public void setLastName(String lastName) {
+            this.lastName = lastName;
+        }
     }
 }
