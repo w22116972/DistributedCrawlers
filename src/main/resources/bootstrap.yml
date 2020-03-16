@@ -1,0 +1,15 @@
+# specific file of Spring cloud and it is loaded before the application.properties or application.yml
+# goal: specify app name, spring cloud config git location, encryp/decryp information
+spring:
+  application:
+    name: config-server
+  profiles:
+    active: license-dev-profile
+  cloud:
+    config:
+      uri: http://localhost:8071
+#        native:
+#          # filesystem-based repo for config
+#          search-locations: file:///Users/
+#server:
+#  port: 8071

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module version="4">
+  <component name="FacetManager">
+    <facet type="Spring" name="Spring">
+      <configuration>
+        <fileset id="fileset" name="Spring Application Context" removed="false">
+          <file>file://$MODULE_DIR$/src/main/java/example/spring/configserver/ConfigServerApp.java</file>
+          <file>file://$MODULE_DIR$/src/main/java/example/spring/ch2/LicenseServiceApp.java</file>
+          <file>file://$MODULE_DIR$/src/main/java/example/spring/ch1/App.java</file>
+        </fileset>
+      </configuration>
+    </facet>
+  </component>
+</module>

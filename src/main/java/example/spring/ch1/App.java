@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController // tell SprintBootFramework that expose the code in this class as RestController class
 @RequestMapping(value="hello") // all Urls expose in this app have prefix /hello
 public class App {
-    public static void main(String[] args) {
-        SpringApplication.run(App.class, args);
-    }
+//    public static void main(String[] args) {
+////        SpringApplication.run(App.class, args);
+//    }
 
     @GetMapping(value="/{firstName}")
     public String helloGET(
