@@ -4,10 +4,10 @@ spring:
   application:
     name: config-server
   profiles:
-    active: license-dev-profile
+    active: dev
   cloud:
     config:
-      uri: http://localhost:8071
+      uri: http://localhost:6379
 #        native:
 #          # filesystem-based repo for config
 #          search-locations: file:///Users/

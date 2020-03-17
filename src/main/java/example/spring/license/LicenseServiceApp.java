@@ -12,6 +12,7 @@ import java.util.Locale;
 @SpringBootApplication
 public class LicenseServiceApp {
     public static void main(String[] args) {
+
         SpringApplication.run(LicenseServiceApp.class, args);
     }
 

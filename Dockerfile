@@ -26,4 +26,4 @@ COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
 
 # exec app
 #ENTRYPOINT ["java","-jar","/app.jar"]
-ENTRYPOINT ["java","-cp","app:app/lib/*","example.spring.ch2.LicenseServiceApp"]
+ENTRYPOINT ["java","-cp","app:app/lib/*","example.spring.license.LicenseServiceApp"]

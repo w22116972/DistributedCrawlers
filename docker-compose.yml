@@ -7,4 +7,10 @@ services:
         - "8080:8080"
       environment:
         - "SPRING_PROFILES_ACTIVE=dev"
-        - "SPRING_CLOUD_CONFIG_URI = http://configserver:8071"
+        - "SPRING_CLOUD_CONFIG_URI=http://localhost:6379"
+
+#  configserver:
+#    image: redis
+#    restart: always
+#    ports:
+#      - "6379:6379"

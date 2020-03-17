@@ -14,7 +14,8 @@ import java.util.Locale;
 @RefreshScope
 public class LicenseServiceApp {
     public static void main(String[] args) {
-        SpringApplication.run(LicenseServiceApp.class, args);
+
+        //SpringApplication.run(LicenseServiceApp.class, args);
     }
 
     @Bean
